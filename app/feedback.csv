@@ -1,0 +1,5 @@
+text,predicted_label,confidence,correct
+:(,Positive,0.6447206735610962,False
+I'm really pissed about the gouv,Negative,0.820580244064331,True
+I'm really pissed but i'm so in love,Positive,0.6022180318832397,True
+i'm so in love but still pissed,Negative,0.8024564981460571,True
