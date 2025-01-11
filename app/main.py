@@ -1,11 +1,34 @@
-import csv
 import os
+import csv
 from typing import Dict
 
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from azure.monitor.opentelemetry import configure_azure_monitor
+from opentelemetry import trace
+from opentelemetry.trace import (
+    get_tracer_provider,
+)
+import logging
+from opentelemetry.propagate import extract
+
+# 1) Import load_dotenv from python-dotenv
+from dotenv import load_dotenv
+
+
+# 2) Load environment variables from .env
+load_dotenv()
+
+if os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING"):
+    configure_azure_monitor()
+
+tracer = trace.get_tracer(__name__, tracer_provider=get_tracer_provider())
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 from transformers import BertTokenizer, TFBertForSequenceClassification
 import tensorflow as tf
 
@@ -14,13 +37,20 @@ APP_DIR = os.path.dirname(os.path.abspath(__file__)) + "/"
 MODEL_PATH = APP_DIR + "./my_bert_model"
 FEEDBACK_FILE = APP_DIR + "feedback.csv"
 
-# Ensure feedback file exists
+# 3) Fetch the connection string from environment (loaded by python-dotenv)
+CONNECTION_STRING = os.getenv("APPINSIGHTS_CONNECTION_STRING")
+
+# Ensure feedback CSV exists
 if not os.path.exists(FEEDBACK_FILE):
     with open(FEEDBACK_FILE, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         writer.writerow(["text", "predicted_label", "confidence", "correct"])
 
-# 1. Load model and tokenizer at startup (or lazily in the endpoint)
+app = FastAPI(title="Tweet Sentiment API", version="1.0")
+FastAPIInstrumentor.instrument_app(app)
+app.mount("/static", StaticFiles(directory=APP_DIR + "static"), name="static")
+
+
 print("Loading model and tokenizer...")
 tokenizer = BertTokenizer.from_pretrained(MODEL_PATH)
 model = TFBertForSequenceClassification.from_pretrained(MODEL_PATH)
@@ -49,13 +79,6 @@ def classify_tweet(text: str, tokenizer, model, max_len=30):
     label_str = label_map[predicted_id]
 
     return label_str, confidence
-
-
-# 3. Define FastAPI app
-app = FastAPI(title="Tweet Sentiment API", version="1.0")
-
-# Mount static files
-app.mount("/static", StaticFiles(directory=APP_DIR + "static"), name="static")
 
 
 # 4. Request Body Schema
@@ -105,4 +128,12 @@ def store_feedback(feedback_data: FeedbackInput):
             feedback_data.confidence,
             feedback_data.correct
         ])
+    # Log feedback to Application Insights
+    logger.info("Feedback received",
+                extra={"custom_dimensions": {
+                    "text": feedback_data.text,
+                    "label": feedback_data.label,
+                    "confidence": feedback_data.confidence,
+                    "correct": feedback_data.correct,
+                }})
     return {"message": "Feedback submitted successfully"}
