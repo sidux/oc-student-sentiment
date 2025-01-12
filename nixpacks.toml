@@ -1,0 +1,5 @@
+[phases]
+setup = "pyenv install 3.12 && pyenv global 3.12"
+
+[environment]
+PYTHON_VERSION = "3.12"
