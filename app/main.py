@@ -17,6 +17,7 @@ import logging
 from dotenv import load_dotenv
 from transformers import BertTokenizer, TFBertForSequenceClassification
 import tensorflow as tf
+from azure.monitor.events.extension import track_event
 
 # Load environment variables
 load_dotenv()
@@ -31,16 +32,16 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 # Set up metrics
-meter_provider = MeterProvider()
-set_meter_provider(meter_provider)
-meter = meter_provider.get_meter(__name__)
+# meter_provider = MeterProvider()
+# set_meter_provider(meter_provider)
+# meter = meter_provider.get_meter(__name__)
 
 # Define custom metrics
-feedback_counter = meter.create_counter(
-    name="feedback_submissions",
-    description="Counts the number of feedback submissions",
-    unit="1"
-)
+# feedback_counter = meter.create_counter(
+#     name="feedback_submissions",
+#     description="Counts the number of feedback submissions",
+#     unit="1"
+# )
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__)) + "/"
 MODEL_PATH = APP_DIR + "./my_bert_model"
@@ -91,16 +92,12 @@ def predict_sentiment(input_data: TweetInput, request: Request) -> Dict:
     label, confidence = classify_tweet(input_data.text, tokenizer, model)
 
     # Log the prediction to Application Insights
-    trace_id = extract(request.headers).get("traceparent")
     logger.info(
         "Prediction made",
         extra={
-            "custom_dimensions": {
-                "trace_id": trace_id,
-                "text": input_data.text,
-                "predicted_label": label,
-                "confidence": confidence,
-            }
+            "text": input_data.text,
+            "predicted_label": label,
+            "confidence": confidence,
         }
     )
 
@@ -139,21 +136,23 @@ def store_feedback(feedback_data: FeedbackInput, request: Request):
         ])
 
     # Log feedback to Application Insights
-    trace_id = extract(request.headers).get("traceparent")
+    track_event("feedback", {
+        "text": feedback_data.text,
+        "label": feedback_data.label,
+        "correct": str(feedback_data.correct)
+    })
+
     logger.info(
         "Feedback received",
         extra={
-            "custom_dimensions": {
-                "trace_id": trace_id,
-                "text": feedback_data.text,
-                "label": feedback_data.label,
-                "confidence": feedback_data.confidence,
-                "correct": feedback_data.correct,
-            }
+            "text": feedback_data.text,
+            "label": feedback_data.label,
+            "confidence": feedback_data.confidence,
+            "correct": feedback_data.correct,
         }
     )
 
     # Increment feedback counter
-    feedback_counter.add(1, {"correct": feedback_data.correct})
+    # feedback_counter.add(1, {"correct": feedback_data.correct})
 
     return {"message": "Feedback submitted successfully"}

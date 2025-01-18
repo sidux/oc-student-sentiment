@@ -1,0 +1,42 @@
+#name: Deploy FastAPI to Azure
+#
+#on:
+#    push:
+#        branches:
+#            - main  # Deploy only when changes are pushed to the main branch
+#
+#jobs:
+#    build-and-deploy:
+#        runs-on: ubuntu-latest
+#
+#        steps:
+#            - name: Checkout code
+#              uses: actions/checkout@v2
+#
+#            - name: Set up Python
+#              uses: actions/setup-python@v3
+#              with:
+#                  python-version: "3.9"
+#
+#            - name: Install Poetry
+#              run: |
+#                  curl -sSL https://install.python-poetry.org | python3 -
+#                  export PATH="$HOME/.local/bin:$PATH"
+#
+#            - name: Install dependencies with Poetry
+#              run: poetry install --no-root
+#
+#            - name: Run tests
+#              run: poetry run pytest
+#
+#            - name: Login to Azure
+#              uses: azure/login@v1
+#              with:
+#                  creds: ${{ secrets.AZURE_CREDENTIALS }}
+#
+#            - name: Deploy to Azure Web App
+#              uses: azure/webapps-deploy@v2
+#              with:
+#                  app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+#                  slot-name: production
+#                  package: .

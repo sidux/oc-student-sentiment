@@ -2,10 +2,6 @@
 
 {
 
-  packages = [
-    pkgs.railway-cli
-  ];
-
   languages.python = {
     enable = true;
     poetry = {

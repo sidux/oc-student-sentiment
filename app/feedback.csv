@@ -8,3 +8,26 @@ test,Positive,0.5000865459442139,True
 testtest,Positive,0.7688211798667908,True
 hello,Positive,0.8677555918693542,True
 hello my old friend,Positive,0.8751426339149475,True
+testtest,Positive,0.7688211798667908,True
+hellohello,Positive,0.8580381870269775,False
+test test test,Positive,0.7712279558181763,False
+test test test,Positive,0.7712279558181763,False
+testtesttest,Positive,0.8060756921768188,False
+testtesttest,Positive,0.8060756921768188,True
+testtesttest,Positive,0.8060756921768188,False
+testaaaa,Positive,0.6708428263664246,False
+testaaaa,Positive,0.6708428263664246,True
+testaaaa,Positive,0.6708428263664246,True
+testaaaa,Positive,0.6708428263664246,False
+testaaaa,Positive,0.6708428263664246,False
+testaaaa,Positive,0.6708428263664246,False
+testaaaa,Positive,0.6708428263664246,False
+testaaaa,Positive,0.6708428263664246,True
+testaaaa,Positive,0.6708428263664246,True
+testaaaa,Positive,0.6708428263664246,True
+testaaaa,Positive,0.6708428263664246,True
+testaaaa,Positive,0.6708428263664246,False
+testaaaa,Positive,0.6708428263664246,False
+testaaaa,Positive,0.6708428263664246,False
+testaaaa,Positive,0.6708428263664246,False
+testaaaa,Positive,0.6708428263664246,False
