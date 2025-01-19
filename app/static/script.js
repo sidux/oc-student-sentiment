@@ -1,13 +1,16 @@
-const predictButton = document.getElementById('predictButton');
 const tweetInput = document.getElementById('tweetInput');
+const predictButton = document.getElementById('predictButton');
 const resultDiv = document.getElementById('result');
-const labelSpan = document.getElementById('label');
+const loadingMessage = document.getElementById('loadingMessage');
+const resultMessage = document.getElementById('resultMessage');
+const sentimentSpan = document.getElementById('sentiment');
 const confidenceSpan = document.getElementById('confidence');
 const feedbackButtons = document.getElementById('feedbackButtons');
 const thumbsUpButton = document.getElementById('thumbsUp');
 const thumbsDownButton = document.getElementById('thumbsDown');
+const feedbackMessage = document.getElementById('feedbackMessage');
 
-let currentPrediction = null; // Store the current prediction data
+let currentPrediction = null;
 
 predictButton.addEventListener('click', () => {
     const tweetText = tweetInput.value;
@@ -16,6 +19,15 @@ predictButton.addEventListener('click', () => {
         alert("Please enter a tweet!");
         return;
     }
+
+    predictButton.disabled = true;
+    predictButton.textContent = 'Predicting...';
+
+    loadingMessage.textContent = 'Analysing sentiments...';
+    loadingMessage.style.display = 'block';
+    resultMessage.style.display = 'none';
+    feedbackButtons.style.display = 'none';
+    feedbackMessage.style.display = 'none';
 
     fetch('/predict', {
         method: 'POST',
@@ -26,12 +38,13 @@ predictButton.addEventListener('click', () => {
     })
     .then(response => response.json())
     .then(data => {
-        labelSpan.textContent = data.label;
-        confidenceSpan.textContent = data.confidence.toFixed(2);
         resultDiv.style.display = 'block';
-        feedbackButtons.style.display = 'block'; // Show feedback buttons
+        resultMessage.style.display = 'block';
+        sentimentSpan.textContent = data.label;
+        confidenceSpan.textContent = data.confidence.toFixed(2);
+        feedbackButtons.style.display = 'block';
+        loadingMessage.style.display = 'none';
 
-        // Store current prediction for feedback
         currentPrediction = {
             text: tweetText,
             label: data.label,
@@ -41,15 +54,19 @@ predictButton.addEventListener('click', () => {
     .catch(error => {
         console.error('Error:', error);
         alert("An error occurred. Please try again.");
+    })
+    .finally(() => {
+        predictButton.disabled = false;
+        predictButton.textContent = 'Predict Sentiment';
     });
 });
 
 thumbsUpButton.addEventListener('click', () => {
-    sendFeedback(true); // true for thumbs-up
+    sendFeedback(true);
 });
 
 thumbsDownButton.addEventListener('click', () => {
-    sendFeedback(false); // false for thumbs-down
+    sendFeedback(false);
 });
 
 function sendFeedback(isCorrect) {
@@ -67,9 +84,10 @@ function sendFeedback(isCorrect) {
     })
     .then(response => {
         if (response.ok) {
-            alert("Feedback submitted! Thank you.");
-            feedbackButtons.style.display = 'none'; // Hide feedback buttons
-            currentPrediction = null; // Clear current prediction
+            feedbackButtons.style.display = 'none';
+            feedbackMessage.textContent = 'Thank you for your feedback!';
+            feedbackMessage.style.display = 'block';
+            currentPrediction = null;
         } else {
             throw new Error("Failed to submit feedback.");
         }

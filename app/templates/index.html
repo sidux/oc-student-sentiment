@@ -13,13 +13,17 @@
     <button id="predictButton">Predict Sentiment</button>
     <div id="result">
         <h2>Result:</h2>
-        <p>Label: <span id="label">-</span></p>
-        <p>Confidence: <span id="confidence">-</span></p>
+        <div id="resultMessage">
+            <p>Sentiment: <span id="sentiment">-</span></p>
+            <p>Confidence: <span id="confidence">-</span></p>
+        </div>
+        <p id="loadingMessage" style="display: none;"></p>
         <div id="feedbackButtons" style="display: none;">
             <p>Is the prediction correct?</p>
             <button id="thumbsUp">👍</button>
             <button id="thumbsDown">👎</button>
         </div>
+        <p id="feedbackMessage" style="display: none;"></p>
     </div>
 </div>
 <script src="{{ url_for('static', path='/script.js') }}"></script>

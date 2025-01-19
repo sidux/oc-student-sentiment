@@ -49,3 +49,20 @@ button:hover {
     margin: 0 10px;
     font-size: 20px; /* Make buttons a bit bigger */
 }
+
+button[disabled] {
+  background-color: #cccccc; /* Light gray */
+  color: #666666;          /* Darker gray text */
+  cursor: not-allowed;      /* Show "not allowed" cursor */
+}
+
+#loadingMessage {
+    font-style: italic;
+    color: #888888; /* Slightly grayed out */
+}
+
+#feedbackMessage {
+  font-style: italic;
+  color: green; /* Or any suitable color */
+  margin-top: 5px; /* Add some spacing */
+}

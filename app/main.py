@@ -1,5 +1,6 @@
 import os
 import csv
+import time
 from typing import Dict
 
 from fastapi import FastAPI, Request
@@ -90,7 +91,7 @@ class TweetInput(BaseModel):
 @app.post("/predict", summary="Predict sentiment of a tweet")
 def predict_sentiment(input_data: TweetInput, request: Request) -> Dict:
     label, confidence = classify_tweet(input_data.text, tokenizer, model)
-
+    time.sleep(2)
     # Log the prediction to Application Insights
     logger.info(
         "Prediction made",

@@ -23,4 +23,6 @@
   processes = {
     uvicorn.exec = "poetry run uvicorn app.main:app --reload --reload-include '.env*' --reload-include '.env' --reload-include '*.yaml'";
   };
+
+  scripts.up.exec = "devenv up";
 }
