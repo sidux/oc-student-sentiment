@@ -4,6 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["sidux <ahmed.lebbada@gmail.com>"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -23,6 +24,7 @@ opentelemetry-sdk = "^1.29.0"
 azure-monitor-opentelemetry = "^1.6.4"
 logging = "^0.4.9.6"
 azure-monitor-events-extension = "^0.1.0"
+watchfiles = "^1.0.4"
 
 
 [build-system]
