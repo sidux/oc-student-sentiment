@@ -24,8 +24,7 @@ jobs:
           ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-        run: |
-          echo "Azure environment variables are set."
+        run: echo "Azure environment variables set."
 
       # Azure Login
       - name: Azure Login
@@ -52,6 +51,9 @@ jobs:
       # Initialize Terraform
       - name: Initialize Terraform
         run: terraform -chdir=terraform init
+
+      - name: Import Resource Group
+        run: terraform -chdir=terraform import azurerm_resource_group.main /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/OC-Student
 
       # Check Terraform Formatting
       - name: Check Terraform Formatting
