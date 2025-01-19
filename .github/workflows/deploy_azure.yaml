@@ -20,47 +20,53 @@ jobs:
 
         steps:
             # Checkout the code
-            -   name: Checkout code
-                uses: actions/checkout@v3
+            - name: Checkout code
+              uses: actions/checkout@v3
 
             # Setup Terraform
-            -   name: Setup Terraform
-                uses: hashicorp/setup-terraform@v2
-                with:
-                    terraform_version: 1.5.0
+            - name: Setup Terraform
+              uses: hashicorp/setup-terraform@v2
+              with:
+                  terraform_version: 1.5.0
 
-            # Terraform Init
-            -   name: Initialize Terraform
-                run: terraform init
+            # Remove any existing .terraform directory
+            - name: Clean Terraform Cache
+              run: rm -rf terraform/.terraform
 
-            # Terraform Format Check
-            -   name: Format and validate Terraform
-                run: |
-                    terraform fmt -check
-                    terraform validate
+            # Initialize Terraform
+            - name: Initialize Terraform
+              run: terraform -chdir=terraform init
+
+            # Check Terraform Formatting
+            - name: Check Terraform Formatting
+              run: terraform -chdir=terraform fmt -check
+
+            # Validate Terraform Configuration
+            - name: Validate Terraform Configuration
+              run: terraform -chdir=terraform validate
 
             # Terraform Plan
-            -   name: Terraform Plan
-                run: terraform plan
+            - name: Terraform Plan
+              run: terraform -chdir=terraform plan
 
             # Terraform Apply
-            -   name: Terraform Apply
-                id: apply
-                run: terraform apply -auto-approve
+            - name: Terraform Apply
+              id: apply
+              run: terraform -chdir=terraform apply -auto-approve
 
             # Login to Azure Container Registry
-            -   name: Azure Login
-                uses: azure/login@v1
-                with:
-                    creds: ${{ secrets.AZURE_CREDENTIALS }}
+            - name: Azure Login
+              uses: azure/login@v1
+              with:
+                  creds: ${{ secrets.AZURE_CREDENTIALS }}
 
             # Build and Push Docker Image
-            -   name: Build and Push Docker Image
-                run: |
-                    docker build -t alocpath.azurecr.io/oc-student-sentiment:latest .
-                    docker push alocpath.azurecr.io/oc-student-sentiment:latest
+            - name: Build and Push Docker Image
+              run: |
+                  docker build -t alocpath.azurecr.io/oc-student-sentiment:latest .
+                  docker push alocpath.azurecr.io/oc-student-sentiment:latest
 
             # Output App URL
-            -   name: Output App URL
-                run: |
-                    echo "App URL: $(terraform output -raw app_service_url)"
+            - name: Output App URL
+              run: |
+                  echo "App URL: $(terraform -chdir=terraform output -raw app_service_url)"
