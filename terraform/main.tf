@@ -80,9 +80,9 @@ resource "azurerm_monitor_scheduled_query_rules_alert_v2" "main" {
   scopes = [
     azurerm_application_insights.main.id,
   ]
-  severity        = 3
+  severity              = 3
   target_resource_types = ["microsoft.insights/components"]
-  window_duration = "PT5M"
+  window_duration       = "PT5M"
   criteria {
     operator                = "GreaterThan"
     query                   = "traces\n| where customDimensions.correct == \"False\"\n"
