@@ -8,12 +8,6 @@ on:
         branches:
             - main
 
-env:
-    ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-    ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-    ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-    ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-
 jobs:
     deploy:
         runs-on: ubuntu-latest
@@ -29,44 +23,56 @@ jobs:
               with:
                   terraform_version: 1.5.0
 
-            # Remove any existing .terraform directory
-            - name: Clean Terraform Cache
-              run: rm -rf terraform/.terraform
+
+            # Export Azure Environment Variables
+            -   name: Export Azure Credentials
+                env:
+                    ARM_CLIENT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientId }}
+                    ARM_CLIENT_SECRET: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}
+                    ARM_SUBSCRIPTION_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
+                    ARM_TENANT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).tenantId }}
+                run: |
+                    echo "Azure environment variables set."
+
+            # Clean Terraform Cache
+            -   name: Clean Terraform Cache
+                run: rm -rf terraform/.terraform
 
             # Initialize Terraform
-            - name: Initialize Terraform
-              run: terraform -chdir=terraform init
+            -   name: Initialize Terraform
+                run: terraform -chdir=terraform init
 
             # Check Terraform Formatting
-            - name: Check Terraform Formatting
-              run: terraform -chdir=terraform fmt -check
+            -   name: Check Terraform Formatting
+                run: terraform -chdir=terraform fmt -check
 
             # Validate Terraform Configuration
-            - name: Validate Terraform Configuration
-              run: terraform -chdir=terraform validate
+            -   name: Validate Terraform Configuration
+                run: terraform -chdir=terraform validate
 
             # Terraform Plan
-            - name: Terraform Plan
-              run: terraform -chdir=terraform plan
+            -   name: Terraform Plan
+                run: terraform -chdir=terraform plan
 
             # Terraform Apply
-            - name: Terraform Apply
-              id: apply
-              run: terraform -chdir=terraform apply -auto-approve
+            -   name: Terraform Apply
+                id: apply
+                run: terraform -chdir=terraform apply -auto-approve
 
             # Login to Azure Container Registry
-            - name: Azure Login
-              uses: azure/login@v1
-              with:
-                  creds: ${{ secrets.AZURE_CREDENTIALS }}
+            -   name: Azure Login
+                uses: azure/login@v1
+                with:
+                    creds: ${{ secrets.AZURE_CREDENTIALS }}
 
             # Build and Push Docker Image
-            - name: Build and Push Docker Image
-              run: |
-                  docker build -t alocpath.azurecr.io/oc-student-sentiment:latest .
-                  docker push alocpath.azurecr.io/oc-student-sentiment:latest
+            -   name: Build and Push Docker Image
+                run: |
+                    docker build -t alocpath.azurecr.io/oc-student-sentiment:latest .
+                    docker push alocpath.azurecr.io/oc-student-sentiment:latest
 
             # Output App URL
-            - name: Output App URL
-              run: |
-                  echo "App URL: $(terraform -chdir=terraform output -raw app_service_url)"
+            -   name: Output App URL
+                run: |
+                    echo "App URL: $(terraform -chdir=terraform output -raw app_service_url)"
+
