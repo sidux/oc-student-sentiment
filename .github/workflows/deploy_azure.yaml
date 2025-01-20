@@ -7,9 +7,13 @@ on:
   pull_request:
     branches:
       - main
+
 permissions:
   id-token: write
   contents: read
+
+env:
+  AZURE_CONTAINER_REGISTRY: alocpath
 
 jobs:
   deploy:
@@ -22,15 +26,19 @@ jobs:
 
       # Azure login
       - name: Azure Login
-        uses: azure/login@v2
+        uses: azure/login@v1
         with:
           client-id: ${{ secrets.ARM_CLIENT_ID }}
           tenant-id: ${{ secrets.ARM_TENANT_ID }}
           subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
 
+      - name: ACR Login
+        run: |
+          az acr login -n ${{ env.AZURE_CONTAINER_REGISTRY }}
+
       # Docker login
       - name: Docker Login
-        uses: azure/docker-login@v2
+        uses: azure/docker-login@v1
         with:
           login-server: 'alocpath.azurecr.io'
           username: ${{ secrets.AZURE_REGISTRY_USERNAME }}
@@ -42,4 +50,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: alocpath.azurecr.io/oc-student-sentiment:latest
+          tags: ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/oc-student-sentiment:latest
