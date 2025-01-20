@@ -44,17 +44,9 @@ jobs:
         with:
           terraform_version: 1.5.0
 
-      # Download Terraform State (if exists)
-      - name: Download Terraform State (if exists)
-        uses: actions/download-artifact@v3
-        with:
-          name: terraform-state
-          path: terraform/.terraform/
-        continue-on-error: true
-
       # Clean Terraform Cache
       - name: Clean Terraform Cache
-        run: rm -rf terraform/.terraform/plugins terraform/.terraform/providers
+        run: rm -rf terraform/.terraform
 
       # Initialize Terraform
       - name: Initialize Terraform
@@ -80,7 +72,7 @@ jobs:
 
       # Upload Terraform State
       - name: Upload Terraform State
-        if: steps.plan.outcome == 'success'
+        if: success()
         uses: actions/upload-artifact@v3
         with:
           name: terraform-state
@@ -100,6 +92,5 @@ jobs:
 
       # Output App URL
       - name: Output App URL
-        if: github.ref == 'refs/heads/main' && steps.plan.outcome == 'success'
         run: |
           echo "App URL: $(terraform -chdir=terraform output -raw app_service_url)"

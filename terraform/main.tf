@@ -1,5 +1,5 @@
 resource "azurerm_resource_group" "main" {
-  name     = "OC-Student-temp"
+  name     = "OC-Student"
   location = "West Europe"
 }
 
