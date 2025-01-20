@@ -36,48 +36,6 @@ jobs:
               "clientSecret": "${{ secrets.ARM_CLIENT_SECRET }}",
               "subscriptionId": "${{ secrets.ARM_SUBSCRIPTION_ID }}",
               "tenantId": "${{ secrets.ARM_TENANT_ID }}"
-            }
-
-      # Setup Terraform
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.5.0
-
-      # Clean Terraform Cache
-      - name: Clean Terraform Cache
-        run: rm -rf terraform/.terraform
-
-      # Initialize Terraform
-      - name: Initialize Terraform
-        run: terraform -chdir=terraform init
-
-      # Check Terraform Formatting
-      - name: Check Terraform Formatting
-        run: terraform -chdir=terraform fmt -check
-
-      # Validate Terraform Configuration
-      - name: Validate Terraform Configuration
-        run: terraform -chdir=terraform validate
-
-      # Terraform Plan
-      - name: Terraform Plan
-        id: plan
-        run: terraform -chdir=terraform plan -out=tfplan
-
-      # Terraform Apply
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && steps.plan.outcome == 'success'
-        run: terraform -chdir=terraform apply -auto-approve tfplan
-
-      # Upload Terraform State
-      - name: Upload Terraform State
-        if: success()
-        uses: actions/upload-artifact@v3
-        with:
-          name: terraform-state
-          path: terraform/.terraform/
-          retention-days: 5
 
       # Docker login
       - name: Docker login

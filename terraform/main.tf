@@ -15,9 +15,9 @@ resource "azurerm_service_plan" "main" {
 # Azure Container Registry (ACR)
 resource "azurerm_container_registry" "main" {
   admin_enabled       = true
-  location            = "westeurope"
+  location            =  azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
   name                = "alocpath"
-  resource_group_name = "OC-Student"
   sku                 = "Basic"
   depends_on = [
     azurerm_resource_group.main,
@@ -26,7 +26,7 @@ resource "azurerm_container_registry" "main" {
 
 # Log Analytics Workspace
 resource "azurerm_log_analytics_workspace" "main" {
-  name                = "oc-student-sentiment-law"
+  name                = "oc-student-sentiment-log"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   depends_on = [
@@ -62,12 +62,13 @@ resource "azurerm_linux_web_app" "main" {
 resource "azurerm_application_insights" "main" {
   application_type    = "web"
   location            = azurerm_resource_group.main.location
-  name                = "oc-student-sentiment"
+  name                = "oc-student-sentiment-insights"
   resource_group_name = azurerm_resource_group.main.name
   sampling_percentage = 0
-  workspace_id        = "/subscriptions/61585847-8d6c-4085-ac31-453a9f6b8938/resourceGroups/DefaultResourceGroup-WEU/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-61585847-8d6c-4085-ac31-453a9f6b8938-WEU"
+  workspace_id        = azurerm_log_analytics_workspace.main.id
   depends_on = [
     azurerm_resource_group.main,
+    azurerm_log_analytics_workspace.main,
   ]
 }
 
