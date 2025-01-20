@@ -1,6 +1,6 @@
 resource "azurerm_resource_group" "main" {
-  name     = "OC-Student-temp"
-  location = "West Europe"
+    name     = "OC-Student-temp"
+    location = "West Europe"
 }
 
 # App Service Plan
